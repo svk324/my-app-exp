@@ -1,0 +1,72 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String    @unique
+  email     String    @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  incomes   Income[]
+  expenses  Expense[]
+  budgets   Budget[]
+}
+
+model Income {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  amount     Float
+  date       DateTime
+  category   IncomeCategory
+  description String?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String       @db.ObjectId
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Expense {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount     Float
+  date       DateTime
+  category   ExpenseCategory
+  description String?
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String        @db.ObjectId
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model Budget {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount     Float
+  year       Int
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String        @db.ObjectId
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@unique([userId, year])
+}
+
+enum IncomeCategory {
+  STARTUP
+  JOB
+  FREELANCE
+  SOCIAL_MEDIA
+}
+
+enum ExpenseCategory {
+  BILLS_RECHARGE
+  TRAVELING
+  ENTERTAINMENT
+  EDUCATION_COURSES
+}
